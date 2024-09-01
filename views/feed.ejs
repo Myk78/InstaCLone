@@ -18,18 +18,17 @@
           </div>
         </div>
       </a>
-      <% stories.forEach(function(story){ %>
-        <a href="/story/<%= story.id %>">
+
+        <a href="#">
           <div class="circle flex-shrink-0">
             <div
               class="gradient w-[18vw] h-[18vw] bg-sky-100 rounded-full bg-gradient-to-r from-purple-700 to-orange-500 flex items-center justify-center">
               <div class="inner w-[92%] h-[92%] rounded-full overflow-hidden">
-                <img class="w-full h-full object-cover" src="/images/uploads/<%= story.user.picture %>" alt="">
+                <img class="w-full h-full object-cover" src="#" alt="">
               </div>
             </div>
           </div>
         </a>
-        <% }) %>
     </div>
     <div class="posts parent mb-20">
       <% posts.reverse().forEach(function(post){ %>
@@ -51,22 +50,22 @@
           </div>
           <div class="options w-full px-4 flex justify-between items-center text-[1.4rem]">
             <div class="flex gap-3 mt-2">
-              <% if(post.like.indexOf(user._id)===-1){ %>
+
                 <i class="heart ri-heart-3-line"></i>
-                <% } else { %>
-                  <i class="heart ri-heart-3-fill text-red-500"></i>
-                  <% } %>
+
+                  <!-- <i class="heart ri-heart-3-fill text-red-500"></i> -->
+
                     <i class="ri-chat-3-line"></i>
                     <i class="ri-share-circle-line"></i>
             </div>
-            <% if(user.saved.indexOf(post.id)===-1){ %>
+
               <i data-postid="<%= post.id %>" class="save ri-bookmark-line"></i>
-              <% } else { %>
-                <i data-postid="<%= post.id %>" class="save ri-bookmark-fill text-zinc-100"></i>
-                <% } %>
+
+                <!-- <i data-postid="<%= post.id %>" class="save ri-bookmark-fill text-zinc-100"></i> -->
+
           </div>
           <h3 class="likeval px-4 mt-2 text-sm leading-none tracking-tight">
-            <%= post.like.length %> likes
+            <%= post.length %> 
           </h3>
           <h2 class="text-white font-light text-sm mt-2">
             <span class="font-semibold pl-4 pr-2">

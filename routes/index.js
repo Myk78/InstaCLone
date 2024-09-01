@@ -10,6 +10,7 @@ const localStrategy = require("passport-local");
 passport.use(new localStrategy(userModel.authenticate()));
 const upload = require("./multer");
 const utils = require("../utils/utils");
+const { default: mongoose } = require("mongoose");
 
 
 // GET
@@ -25,11 +26,11 @@ router.get("/login", function (req, res) {
 router.get("/like/:postid", async function (req, res) {
   const post = await postModel.findOne({ _id: req.params.postid });
   const user = await userModel.findOne({ username: req.session.passport.user });
-  if (post.like.indexOf(user._id) === -1) {
-    post.like.push(user._id);
-  } else {
-    post.like.splice(post.like.indexOf(user._id), 1);
-  }
+  // if (post.like.indexOf(user._id) === -1) {
+  //   post.like.push(user._id);
+  // } else {
+  //   post.like.splice(post.like.indexOf(user._id), 1);
+  // }
   await post.save();
   res.json(post);
 });
@@ -39,17 +40,17 @@ router.get("/feed", isLoggedIn, async function (req, res) {
     .findOne({ username: req.session.passport.user })
     .populate("posts");
 
-  let stories = await storyModel.find({ user: { $ne: user._id } })
-  .populate("user");
+  // let stories = await storyModel.find({ user: { $ne: user._id } })
+  // .populate("user");
 
-  var uniq = {};
-  var filtered = stories.filter(item => {
-    if(!uniq[item.user.id]){
-      uniq[item.user.id] = " ";
-      return true;
-    }
-    else return false;
-  })
+  // var uniq = {};
+  // var filtered = stories.filter(item => {
+  //   if(!uniq[item.user.id]){
+  //     uniq[item.user.id] = " ";
+  //     return true;
+  //   }
+  //   else return false;
+  // })
 
   let posts = await postModel.find().populate("user");
 
@@ -57,7 +58,7 @@ router.get("/feed", isLoggedIn, async function (req, res) {
     footer: true,
     user,
     posts,
-    stories: filtered,
+    // stories: filtered,
     dater: utils.formatRelativeTime,
   });
 });
@@ -229,6 +230,18 @@ router.post(
   }),
   function (req, res) {}
 );
+
+router.post('/posty',upload.single("image"),isLoggedIn,  async  function(req,res){
+const user = await userModel.findOne({username: req.session.passport.user});
+const post = await postModel.create({
+  picture:req.file.filename,
+  caption:req.body.caption,
+  user: user._id,
+});
+user.posts.push(post._id);
+await user.save();
+res.redirect("/feed",);
+});
 
 router.get("/logout", function (req, res, next) {
   req.logout(function (err) {
