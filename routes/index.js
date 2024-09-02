@@ -1,7 +1,7 @@
 var express = require("express");
 var router = express.Router();
 
-const userModel = require("./users")
+const userModel = require("./users");
 const postModel = require("./posts");
 const storyModel = require("./story");
 
@@ -12,27 +12,37 @@ const upload = require("./multer");
 const utils = require("../utils/utils");
 const { default: mongoose } = require("mongoose");
 
-
 // GET
 router.get("/", function (req, res) {
-  res.render("index", { footer: false ,error:req.flash('error')  });
+  res.render("index", { footer: false, error: req.flash("error") });
 });
 
 router.get("/login", function (req, res) {
   // console.log(req.flash());
-  res.render("login", { footer: false, error:req.flash('error') });
+  res.render("login", { footer: false, error: req.flash("error") });
 });
 
-router.get("/like/:postid", async function (req, res) {
-  const post = await postModel.findOne({ _id: req.params.postid });
+router.get("/like/post/:id", isLoggedIn, async function (req, res) {
+  const post = await postModel.findOne({ _id: req.params.id });
   const user = await userModel.findOne({ username: req.session.passport.user });
-  // if (post.like.indexOf(user._id) === -1) {
-  //   post.like.push(user._id);
-  // } else {
-  //   post.like.splice(post.like.indexOf(user._id), 1);
-  // }
+  //  if i only write this -> "post.like.push(user._id);" so the one user like the same post many times
+
+  // thats why we use the indexOf to find user id to check that he like post only onetime and also remove the like if he liked already by using splice function
+
+  // (post.like.indexOf(user._id) === -1) meaning of this to check the userId in post.like and === -1 is show the user id is not found in array the index start from 0
+
+  if (!post) {
+    return res.status(404).send("Post not found");
+  }
+
+  if (post.like.indexOf(user._id) === -1) {
+    post.like.push(user._id);
+  } else {
+    post.like.splice(post.like.indexOf(user._id), 1);
+  }
   await post.save();
-  res.json(post);
+  res.redirect("/feed");
+  // res.json(post, user);
 });
 
 router.get("/feed", isLoggedIn, async function (req, res) {
@@ -130,9 +140,9 @@ router.get("/save/:postid", isLoggedIn, async function (req, res) {
 
 router.get("/search/:user", isLoggedIn, async function (req, res) {
   const searchTerm = `^${req.params.user}`;
-  
-  const regex = new RegExp(searchTerm, 'i');
-// username: { $regex: new RegExp(username, 'i') }
+
+  const regex = new RegExp(searchTerm, "i");
+  // username: { $regex: new RegExp(username, 'i') }
   let users = await userModel.find({ username: { $regex: regex } });
 
   res.json(users);
@@ -148,18 +158,23 @@ router.get("/upload", isLoggedIn, async function (req, res) {
   res.render("upload", { footer: true, user });
 });
 
-router.post("/update", isLoggedIn, upload.single("image"), async function (req, res) {
-  const user = await userModel.findOneAndUpdate(
-    { username: req.session.passport.user },
-    { username: req.body.username, name: req.body.name, bio: req.body.bio },
-    { new: true }
-  );
-  if(req.file){
-   user.picture= req.file.filename; 
+router.post(
+  "/update",
+  isLoggedIn,
+  upload.single("image"),
+  async function (req, res) {
+    const user = await userModel.findOneAndUpdate(
+      { username: req.session.passport.user },
+      { username: req.body.username, name: req.body.name, bio: req.body.bio },
+      { new: true }
+    );
+    if (req.file) {
+      user.picture = req.file.filename;
+    }
+    await user.save();
+    res.redirect("/profile");
   }
-  await user.save();
-  res.redirect('/profile');
-});
+);
 
 router.post(
   "/post",
@@ -227,22 +242,29 @@ router.post(
   passport.authenticate("local", {
     successRedirect: "/feed",
     failureRedirect: "/login",
-    failureFlash:true
+    failureFlash: true,
   }),
   function (req, res) {}
 );
 
-router.post('/posty',upload.single("image"),isLoggedIn,  async  function(req,res){
-const user = await userModel.findOne({username: req.session.passport.user});
-const post = await postModel.create({
-  picture:req.file.filename,
-  caption:req.body.caption,
-  user: user._id,
-});
-user.posts.push(post._id);
-await user.save();
-res.redirect("/feed",);
-});
+router.post(
+  "/posty",
+  upload.single("image"),
+  isLoggedIn,
+  async function (req, res) {
+    const user = await userModel.findOne({
+      username: req.session.passport.user,
+    });
+    const post = await postModel.create({
+      picture: req.file.filename,
+      caption: req.body.caption,
+      user: user._id,
+    });
+    user.posts.push(post._id);
+    await user.save();
+    res.redirect("/feed");
+  }
+);
 
 router.get("/logout", function (req, res, next) {
   req.logout(function (err) {
