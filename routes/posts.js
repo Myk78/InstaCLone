@@ -13,10 +13,10 @@ data: {
   type: Date,
   default: Date.now,
 },
-like: {
+like: [{
   type: mongoose.Schema.Types.ObjectId,
   ref: "user",
-},
+}],
 
 });
 module.exports = mongoose.model("post",postschema);

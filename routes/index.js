@@ -130,8 +130,9 @@ router.get("/save/:postid", isLoggedIn, async function (req, res) {
 
 router.get("/search/:user", isLoggedIn, async function (req, res) {
   const searchTerm = `^${req.params.user}`;
-  const regex = new RegExp(searchTerm);
-
+  
+  const regex = new RegExp(searchTerm, 'i');
+// username: { $regex: new RegExp(username, 'i') }
   let users = await userModel.find({ username: { $regex: regex } });
 
   res.json(users);

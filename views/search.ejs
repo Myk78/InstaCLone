@@ -9,8 +9,38 @@
 
         </div>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.7/axios.min.js" integrity="sha512-DdX/YwF5e41Ok+AI81HI8f5/5UsoxCVT9GKYZRIzpLxb8Twz4ZwPPX+jQMwMhNQ9b5+zDEefc+dcvQoPWGNZ3g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <script>
+        var search = document.querySelector(".input");
+        var clutter = "";
+        search.addEventListener("input", function(){
+            axios.get(`/search/${search.value}`).then(
+                function(data){
+                    data.data.forEach(function(item){
+                        clutter =`<a href="/profile/${item.username}" class="outline-none">
+                     <div class="text-white flex items-center gap-2 mt-5">
+                    <div class="image w-[11vw] h-[11vw] rounded-full bg-sky-100 overflow-hidden">
+                    <img src="/images/uploads/${item.picture}" alt="">
+                    </div>
+                    <div class="text">
+                    <h3>${item.username}</h3>
+                    <h4 class="text-xs opacity-30 leading-none">${item.name}</h4>
+                     </div>
+                 </div>            
+                  </a>`
+                    });
+                    document.querySelector(".users")
+                    .innerHTML = clutter;
+              
+                 })
+
+
+                    // console.log(data);
+         })
+    </script>
+
+    <!-- <script>
         var inp = document.querySelector(".input")
 
         inp.addEventListener("input", function (e) {
@@ -21,23 +51,9 @@
                         let clutter = "";
 
                         result.forEach((item) => {
-                            clutter += `<a href="/profile/${item.username}" class="outline-none">
-            <div class="text-white flex items-center gap-2 mt-5">
-                <div class="image w-[11vw] h-[11vw] rounded-full bg-sky-100 overflow-hidden">
-                    <img src="/images/uploads/${item.picture}" alt="">
-                    </div>
-                <div class="text">
-                    <h3>${item.username}</h3>
-                    <h4 class="text-xs opacity-30 leading-none">${item.name}</h4>
-                </div>
-            </div>            
-        </a>`
-                        })
-
-                        document.querySelector(".users")
-                            .innerHTML = clutter;
+                            clutter += 
                     });
             }
         })
-    </script>
+    </script> -->
     <% include ./partials/footer.ejs %>
